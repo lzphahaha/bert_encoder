@@ -65,9 +65,11 @@ class BertEncoder(object):
 
     def __init__(self):
         self.bert_model = modeling.BertModel(config=bert_config, is_training=False, max_seq_length=FLAGS.max_seq_length)
-        init = tf.initialize_all_variables()
+        tvars = tf.trainable_variables()
+        (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, FLAGS.init_cheeckpoint)
+        tf.train.init_from_checkpoint(FLAGS.init_cheeckpoint, assignment_map)
         self.sess = tf.Session()
-        self.sess.run(init)
+        self.sess.run(tf.global_variables_initializer())
 
     def encode(self, sentence):
         input_ids, input_mask = data_preprocess(sentence)
